@@ -2,7 +2,7 @@ import * as z from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate, useParams } from "react-router-dom";
-
+import { useState } from "react";
 import {
   Form,
   FormControl,
@@ -19,11 +19,17 @@ import { ProfileValidation } from "@/lib/validation";
 import { useUserContext } from "@/context/AuthContext";
 import { useGetUserById, useUpdateUser } from "@/lib/react-query/queries";
 
+import { updatePassword } from "@/lib/appwrite/api";
+
 const UpdateProfile = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { id } = useParams();
   const { user, setUser } = useUserContext();
+
+  const [newPassword, setNewPassword] = useState("");
+  const [oldPassword, setOldPassword] = useState("");
+
   const form = useForm<z.infer<typeof ProfileValidation>>({
     resolver: zodResolver(ProfileValidation),
     defaultValues: {
@@ -71,6 +77,20 @@ const UpdateProfile = () => {
       imageUrl: updatedUser?.imageUrl,
     });
     return navigate(`/profile/${id}`);
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      const result = await updatePassword(newPassword, oldPassword);
+      console.log(result); // Handle success
+      // Reset the form or provide user feedback
+      setNewPassword('');
+      setOldPassword('');
+      // Provide a success message to the user
+    } catch (error) {
+      console.error(error); // Handle error
+      // Provide an error message to the user
+    }
   };
 
   return (
@@ -175,6 +195,38 @@ const UpdateProfile = () => {
                 </FormItem>
               )}
             />
+            <FormItem>
+              <FormLabel className="shad-form_label">Old Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  className="shad-input"
+                  placeholder="Old Password"
+                  value={oldPassword}
+                  onChange={(e) => setOldPassword(e.target.value)}
+                />
+              </FormControl>
+            </FormItem>
+            <FormItem>
+              <FormLabel className="shad-form_label">New Password</FormLabel>
+              <FormControl>
+                <Input
+                  type="password"
+                  className="shad-input"
+                  placeholder="Old Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </FormControl>
+            </FormItem>
+
+            <div className="flex gap-4 items-center justify-end mt-4">
+              <Button
+                type="button"
+                onClick={handleSubmit}>
+                Update Password
+              </Button>
+            </div>
 
             <div className="flex gap-4 items-center justify-end">
               <Button

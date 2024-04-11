@@ -25,6 +25,7 @@ import {
   searchPosts,
   savePost,
   deleteSavedPost,
+  searchPostsByUsername,
 } from "@/lib/appwrite/api";
 import { INewPost, INewUser, IUpdatePost, IUpdateUser } from "@/types";
 
@@ -242,5 +243,12 @@ export const useUpdateUser = () => {
         queryKey: [QUERY_KEYS.GET_USER_BY_ID, data?.$id],
       });
     },
+  });
+};
+export const useSearchPostsByUsername = (username: string) => {
+  return useQuery({
+    queryKey: [QUERY_KEYS.SEARCH_POSTS_BY_USERNAME, username],
+    queryFn: () => searchPostsByUsername(username),
+    enabled: !!username,
   });
 };

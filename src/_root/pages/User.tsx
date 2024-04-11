@@ -25,7 +25,7 @@ const SearchResults = ({ isSearchFetching, searchedPosts, isUserSearch }: Search
   }
 };
 
-const Explore = () => {
+const User = () => {
   const { ref, inView } = useInView();
   const { data: posts, fetchNextPage, hasNextPage } = useGetPosts();
   const [searchValue, setSearchValue] = useState("");
@@ -104,4 +104,4 @@ const Explore = () => {
   );
 };
 
-export default Explore;
+export default User;

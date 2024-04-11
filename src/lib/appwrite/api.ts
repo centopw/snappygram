@@ -544,35 +544,55 @@ export async function updateUser(user: IUpdateUser) {
     console.log(error);
   }
 }
-// =================== FOLLOW USER
 export async function followUser(followerId: string, followingId: string) {
+  console.log(`Starting followUser with followerId: ${followerId} and followingId: ${followingId}`);
+  
+  if (followerId === followingId) {
+    throw new Error("Can't follow yourself.");
+  }
+  
   try {
-    if (followerId === followingId) {
-      throw new Error("Can't follow yourself.");
-    }
-    
-    // Fetch both follower and following user documents
     const followerDoc = await databases.getDocument(appwriteConfig.databaseId, appwriteConfig.userCollectionId, followerId);
     const followingDoc = await databases.getDocument(appwriteConfig.databaseId, appwriteConfig.userCollectionId, followingId);
     
-    // Update follower's following array
-    const updatedFollowing = followerDoc.following ? [...followerDoc.following, followingId] : [followingId];
+    console.log('Fetched documents:', followerDoc, followingDoc);
     
-    // Update following user's followers array
-    const updatedFollowers = followingDoc.followers ? [...followingDoc.followers, followerId] : [followerId];
+    let updatedFollowing = followerDoc.following || [];
+    let updatedFollowers = followingDoc.followers || [];
     
-    // Update both documents in the database
+    console.log('Initial following and followers:', updatedFollowing, updatedFollowers);
+    
+    if (updatedFollowing.includes(followingId)) {
+      updatedFollowing = updatedFollowing.filter(id => id !== followingId);
+      updatedFollowers = updatedFollowers.filter(id => id !== followerId);
+      console.log("Unfollow");
+    } else {
+      updatedFollowing.push(followingId);
+      updatedFollowers.push(followerId);
+      console.log("Follow");
+    }
+    
+    console.log('Updated following and followers:', updatedFollowing, updatedFollowers);
+    
     await databases.updateDocument(appwriteConfig.databaseId, appwriteConfig.userCollectionId, followerId, {
       following: updatedFollowing
     });
+    
+    console.log('Updated follower document');
     
     await databases.updateDocument(appwriteConfig.databaseId, appwriteConfig.userCollectionId, followingId, {
       followers: updatedFollowers
     });
     
-    return { message: "Follow action successful" };
+    console.log('Updated following document');
+    
+    console.log(followerId);
+    console.log(followingId);
+    return { message: "Follow action updated successfully" };
   } catch (error) {
-    console.error("Failed to follow user:", error);
+    console.log(followerId);
+    console.log(followingId);
+    console.error("Failed to update follow status:", error);
     throw error;
   }
 }
@@ -616,23 +636,20 @@ export function updatePassword(newPassword: string, oldPassword: string) {
 }
 
 // ============================== SEARCH USER BY USERNAME
-export async function searchUserByUsername(username: string) {
+export async function searchPostsByUsername(username: string) {
   try {
-    // Assuming `username` is a unique field in your user documents
-    const users = await databases.listDocuments(
+    const posts = await databases.listDocuments(
       appwriteConfig.databaseId,
       appwriteConfig.userCollectionId,
-      [Query.equal("username", username)]
+      [Query.search("username", username)]
     );
 
-    // Check if any user was found
-    if (users.documents.length > 0) {
-      return users.documents[0]; // Return the first user found
-    } else {
-      throw new Error("User not found.");
-    }
+    if (!posts) throw Error;
+
+    return posts;
   } catch (error) {
     console.log(error);
-    return null; // Or handle the error as needed
   }
 }
+
+

@@ -42,8 +42,8 @@ const Profile = () => {
 
   // Handler
   const handleFollow = async () => {
-    const followerId = user.id; // ID of the current user
-    const followingId = currentUser.$id; // ID of the user to be followed
+    const followerId = user.id;
+    const followingId = currentUser.$id;
 
     console.log('Follower ID:', followerId);
     console.log('Following ID:', followingId);
@@ -79,7 +79,7 @@ const Profile = () => {
 
             <div className="flex gap-8 mt-10 items-center justify-center xl:justify-start flex-wrap z-20">
               <StatBlock value={currentUser.posts.length} label="Posts" />
-              <StatBlock value={20} label="Followers" />
+              <StatBlock value={currentUser.followers.length} label="Followers" />
               <StatBlock value={currentUser.following.length} label="Following" />
             </div>
 
@@ -106,7 +106,7 @@ const Profile = () => {
               </Link>
             </div>
             <div className={`${user.id === id && "hidden"}`}>
-              <Button type="button" className="shad-button_primary px-8" onClick={handleFollow}>
+              <Button type="button" className="shad-button_primary px-8" onClick={handleFollow} >
                 Follow
               </Button>
             </div>
